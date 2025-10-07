@@ -149,9 +149,7 @@ class Message:
         # Формируем сообщение
         text = "".join([
             "*",
-            await self.__markdown_escape(
-                f'{f"{chat_title}\n" if chat_title else ""}{self.full_name}:',
-            ),
+            await self.__markdown_escape(f"{self.full_name}:"),
             "*",
             await self.__markdown_escape(f"{self.text}"),
         ])

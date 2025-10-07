@@ -40,7 +40,7 @@ async def main(
             logger.debug(req)
 
             if req.get("updates"):
-                data["ts"] += 1
+                data["ts"] = req["ts"]
                 event = req["updates"][0]
 
                 if event[0] == 4:
@@ -64,11 +64,10 @@ async def main(
                         else:
                             logger.debug(_message)
 
-                        pts += 1
-
                         message = _message["items"]
                         profile = _message["profiles"]
                         chat_title = _message["title"]
+                        pts = _message.get("new_pts", pts + 1)
 
                         chat_title = "" if not chat_title else f"{chat_title}"
 
@@ -96,4 +95,3 @@ async def main(
         except Exception as e:
             await send_error(bot, tg_chat_id, tg_topic_id)
             logger.exception(e)
-

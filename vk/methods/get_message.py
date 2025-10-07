@@ -45,6 +45,7 @@ async def get_message(
 
     return {
         "items": req["response"]["messages"]["items"],
-        "profiles": req["response"]["profiles"],
+        "profiles": req["response"].get("profiles", []),
         "title": title,
-        }
+        "new_pts": req["response"].get("new_pts", pts),
+    }
