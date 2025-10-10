@@ -106,9 +106,18 @@ class Message:
         link = (0, 100)
         lvls = ("w", "z", "y", "r", "q", "p", "o", "x", "m", "s")
 
-        for i in attach["sizes"]:
-            if lvls.index(i["type"]) < link[1]:
-                link = (i["url"], lvls.index(i["type"]))
+        sizes = attach.get("sizes", [])
+
+        for size in sizes:
+            try:
+                idx = lvls.index(size["type"])
+            except ValueError:
+                continue
+
+            if idx < link[1]:
+                link = (size["url"], idx)
+        if link[0] == 0 and sizes:
+            return sizes[-1]["url"]
         return link[0]
 
 
@@ -160,7 +169,7 @@ class Message:
         ])
 
         # Вложения (фото, видео, документы)  # noqa: ERA001
-        if self.attachments:
+        if self.media:
             logger.debug(self.media)
             text += " ".join([
                 f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})"

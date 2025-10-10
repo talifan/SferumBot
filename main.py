@@ -60,11 +60,39 @@ async def main(
 
                             _message = await get_message(session, access_token, pts)
 
-                            logger.error(_message)
+                            if _message.get("error"):
+                                logger.error("[MAIN] Failed to fetch VK message after token refresh: {}", _message)
+                                pts += 1
+                                continue
                         else:
                             logger.debug(_message)
 
-                        message = _message["items"]
+                        message_items = _message.get("items")
+                        if not message_items:
+                            logger.warning("[MAIN] Empty items payload for event {}", raw_msg)
+                            pts = _message.get("new_pts", pts + 1)
+                            continue
+                        target_message = next(
+                            (
+                                item for item in reversed(message_items)
+                                if item.get("id") == raw_msg.msg_id
+                            ),
+                            None,
+                        )
+
+                        if target_message is None and message_items:
+                            target_message = message_items[-1]
+
+                        if target_message is None:
+                            logger.warning("[MAIN] Unable to match VK message for event {}", raw_msg)
+                            pts = _message.get("new_pts", pts + 1)
+                            continue
+
+                        if not isinstance(target_message, dict):
+                            logger.warning("[MAIN] Unexpected VK message payload {}", target_message)
+                            pts = _message.get("new_pts", pts + 1)
+                            continue
+
                         profile = _message["profiles"]
                         chat_title = _message["title"]
                         pts = _message.get("new_pts", pts + 1)
@@ -74,7 +102,7 @@ async def main(
                         msg = Message()
                         await msg.async_init(
                             session,
-                            **message[-1],
+                            **target_message,
                             profiles=profile,
                             chat_title=chat_title,
                         )
