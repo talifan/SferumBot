@@ -127,7 +127,12 @@ class Message:
 
     def __repr__(self: Self) -> str:
         sender = self.__dict__.get("full_name", self.sender_id)
-        string = f" from {sender}: {self.text}, chat id: {self.id}"
+        chat_identifier = getattr(self, "chat_msg_id", None)
+        if chat_identifier is None:
+            chat_identifier = getattr(self, "conversation_message_id", None)
+        if chat_identifier is None:
+            chat_identifier = getattr(self, "id", "unknown")
+        string = f" from {sender}: {self.text}, chat id: {chat_identifier}"
         if self.media:
             string += f", media: {self.media}"
         if self.fwd:
