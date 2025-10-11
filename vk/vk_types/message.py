@@ -171,11 +171,14 @@ class Message:
         # Вложения (фото, видео, документы)  # noqa: ERA001
         if self.media:
             logger.debug(self.media)
-            text += " ".join([
-                f"*{x[0]}*" if x[0] != "video" else f"[{x[0]}]({x[1]})"
-                for x in self.media
-            ])
-            text += "\n"
+            video_links = [
+                f"[video]({media_url})"
+                for media_type, media_url in self.media
+                if media_type == "video"
+            ]
+            if video_links:
+                text += " ".join(video_links)
+                text += "\n"
 
         # Пересланные сообщения (forward)
         if self.fwd:
